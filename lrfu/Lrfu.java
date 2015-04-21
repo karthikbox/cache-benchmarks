@@ -9,7 +9,7 @@ public class Lrfu{
 	String base="/home/karthik/cache-benchmark/lirs-trc/";
 	String file="sprite";
 	BufferedWriter out_file = new BufferedWriter(new FileWriter(base+file+"_LRFU.dat"));
-	for(Lrfu.lamda=0;Lrfu.lamda<=2;Lrfu.lamda+=0.01){
+	for(Lrfu.lamda=1;Lrfu.lamda<=10;Lrfu.lamda+=0.05){
 	    System.out.print(String.format("\nLamda->%2.8f\n",Lrfu.lamda));
 	    out_file.write(String.format("\nLamda->%2.8f\n",Lrfu.lamda));
 	    BufferedReader par_file = new BufferedReader(new FileReader(base+file+".par"));
