@@ -96,7 +96,7 @@ int get_range(FILE *trc_fp, long *p_vm_size, long *p_trc_len)
     fscanf(trc_fp, "%ld", &ref_blk);
   }
   
-  printf(" [%d  %d] for %lu refs in the trace\n", min, max, count);
+  fprintf(stderr," [%d  %d] for %lu refs in the trace\n", min, max, count);
   fseek(trc_fp, 0, SEEK_SET);
   *p_vm_size = max;
   *p_trc_len = count;
@@ -111,7 +111,7 @@ FILE *openReadFile(char file_name[])
   fp = fopen(file_name, "r");
 
   if (!fp) {
-    printf("can not find file %s.\n", file_name);
+      fprintf(stderr,"can not find file %s.\n", file_name);
     exit;
     //return NULL;
   }

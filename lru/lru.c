@@ -25,24 +25,25 @@ main(int argc, char* argv[])
   strcpy(argv[2], "ps2"); 
   */
   
-  if (argc != 2){
-    printf("%s: file_name_prefix[.trc] \n", argv[0]);
-    return;
-  }
+  /* if (argc != 2){ */
+  /*   printf("%s: file_name_prefix[.trc] \n", argv[0]); */
+  /*   return; */
+  /* } */
   
 
-  strcpy(para_file_name, argv[1]);
-  strcat(para_file_name, ".par");
-  para_fp = openReadFile(para_file_name);
+  /* strcpy(para_file_name, argv[1]); */
+  /* strcat(para_file_name, ".par"); */
+  /* printf("hi"); */
+  para_fp = openReadFile("/home/karthik/cache-benchmark/lirs-trc/sprite.par");
  
 
-  strcpy(trc_file_name, argv[1]);
-  strcat(trc_file_name, ".trc");
-  trc_fp = openReadFile(trc_file_name);
+  /* strcpy(trc_file_name, argv[1]); */
+  /* strcat(trc_file_name, ".trc"); */
+  trc_fp = openReadFile("/home/karthik/cache-benchmark/lirs-trc/sprite-train.trc");
 
-  strcpy(cuv_file_name, argv[1]);
-  strcat(cuv_file_name, "_LRU.cuv");
-  cuv_fp = fopen(cuv_file_name, "w");
+  /* strcpy(cuv_file_name, argv[1]); */
+  /* strcat(cuv_file_name, "_LRU.cuv"); */
+  cuv_fp = fopen("/home/karthik/cache-benchmark/lirs-trc/sprite_useless.cuv", "w");
 
   get_range(trc_fp, &vm_size, &total_ref_pg);
 
@@ -52,7 +53,7 @@ main(int argc, char* argv[])
     if (mem_size <= 0)
       break;
 
-    printf("\nmem_size = %ld", mem_size);
+    fprintf(stderr,"\nmem_size = %ld", mem_size);
 
     total_ref_pg = 0;
     num_pg_flt = 0;
@@ -79,9 +80,12 @@ main(int argc, char* argv[])
     LRU_list_tail = NULL;
 
     LRU_Repl(trc_fp);    
+    struct pf_struct * temp;
+    for(temp=LRU_list_head;temp!=NULL;temp=temp->LRU_next){
+	printf("%u\n",temp->page_num);
+    }
 
-
-    printf("total_ref_pg = %d  num_pg_flt = %d \npf ratio = %2.1f\%, mem shortage ratio = %2.1f\% \n", total_ref_pg, num_pg_flt, (float)num_pg_flt/total_ref_pg*100, (float)(vm_size-mem_size)/vm_size*100);
+    fprintf(stderr,"total_ref_pg = %d  num_pg_flt = %d \npf ratio = %2.1f\%, mem shortage ratio = %2.1f\% \n", total_ref_pg, num_pg_flt, (float)num_pg_flt/total_ref_pg*100, (float)(vm_size-mem_size)/vm_size*100);
 
     fprintf(cuv_fp, "%5d  %2.1f\n", mem_size, 100-(float)num_pg_flt/total_ref_pg*100);
 
@@ -107,7 +111,7 @@ LRU_Repl(FILE *trc_fp)
     total_ref_pg++;
  
     if (ref_page > vm_size){
-      printf("Wrong ref page number found: %d.\n", ref_page);
+	fprintf(stderr,"Wrong ref page number found: %d.\n", ref_page);
       return FALSE;
     }
 
@@ -169,7 +173,7 @@ LRU_Repl(FILE *trc_fp)
 
   }
 
-  printf("\n");
+  fprintf(stderr,"\n");
   return;
 }
 
