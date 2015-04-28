@@ -2,8 +2,13 @@ import java.io.*;
 import java.util.*;
 
 public class Packing{
-    static int cache_cap=3000;
-    static int sack_cap=600;
+
+    static int cache_cap=3000;	// size of cache
+    static int sack_cap=600;	// size of knapsack
+    static int max=10000;	// max value, used to do MAX-LRU_index
+    static int wt_max=50;	// [1-wt_max] is the weight of items
+    static long seed=0xDEADBEEF; // seed for random number generator
+
     public static int [][]st=new int[cache_cap+1][sack_cap+1];;
     public static int []wt=new int[cache_cap+1];
     public static int []val=new int[cache_cap+1];
@@ -14,11 +19,9 @@ public class Packing{
 	BufferedReader trace=new BufferedReader(new FileReader(base+"/sprite-train.trc"));
 	BufferedReader lru=new BufferedReader(new FileReader(base+"/sprite-lru.dat"));
 	int count=0;
-	int max=10000;
-	int wt_max=50;
-	long seed=0xDEADBEEF;
 	Random gen=new Random(seed);
-
+	ArrayList<Integer> lru_data=new ArrayList<Integer>(cache_cap+1);
+	lru_data.add(-99);	// some dummy data for 0th index
 	String line;
 	while(true){
 	    
@@ -32,6 +35,7 @@ public class Packing{
 	    count++;
 	    wt[count]=gen.nextInt(wt_max)+1;
 	    val[count]=max-count;
+	    lru_data.add(Integer.parseInt(line));
 	}
 	if(count!=cache_cap){
 	    System.out.println("cache not equal to cache_cap");
@@ -59,6 +63,37 @@ public class Packing{
         }
 	
         // print results
+	int size=lru_data.size();
+	// for(int i=1;i<size;i++)
+	//     System.out.println(lru_data.get(i));
+	BufferedReader test=new BufferedReader(new FileReader(base+"/sprite-test.trc"));
+	count=0;
+	int hit_rate=0;
+
+	int it,ind;
+	while(true){
+	    line=test.readLine();
+	    if(line != null){
+		line=line.trim();
+		it=Integer.parseInt(line);
+		count++;
+		// check if it exists in lru items
+		ind=lru_data.indexOf(it);
+		if(ind==-1)
+		    continue;
+		if(take[ind]==true){
+		    hit_rate++;
+		}
+	    }
+	    else{
+		System.out.println("hit rate = "+(100*((double)hit_rate/count)));
+		break;
+	    }
+	    
+	}
+	test.close();
+	System.out.println();
+	System.out.println();
 	System.out.println("max value is "+st[cache_cap][sack_cap]);
         System.out.println("item" + "\t" + "value" + "\t" + "weight" + "\t" + "take");
         for ( n = 1; n <= cache_cap; n++) {
@@ -66,5 +101,6 @@ public class Packing{
         }
 	trace.close();
 	lru.close();
+
     }
 }

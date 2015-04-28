@@ -1,3 +1,11 @@
+MEASURE USED:
+max - lru_order
+where max = 10000
+lru_size  =  3000
+
+hit rate = 8.176820318913405
+
+
 max value is 1996045
 item	value	weight	take
 1	9999	36	false
