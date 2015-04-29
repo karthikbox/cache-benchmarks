@@ -13,6 +13,8 @@ public class Packing{
     public static int []wt=new int[cache_cap+1];
     public static int []val=new int[cache_cap+1];
     public static boolean[][] sol = new boolean[cache_cap+1][sack_cap+1];
+    public static HashMap<Integer,Integer> ht=new HashMap<Integer,Integer>(cache_cap);
+
 
     public static void main(String[] args) throws IOException{
 	String base="/home/karthik/cache-benchmark/lirs-trc/";
@@ -20,21 +22,27 @@ public class Packing{
 	BufferedReader lru=new BufferedReader(new FileReader(base+"/sprite-lru.dat"));
 	int count=0;
 	Random gen=new Random(seed);
+	
+	getRefCounts(trace);
+	printHT();
 	ArrayList<Integer> lru_data=new ArrayList<Integer>(cache_cap+1);
 	lru_data.add(-99);	// some dummy data for 0th index
 	String line;
+	int it;
 	while(true){
 	    
 	    line=lru.readLine();
 	    if(line != null){
 		line=line.trim();
+		it=Integer.parseInt(line);
 	    }
 	    else{
 		break;
 	    }
 	    count++;
 	    wt[count]=gen.nextInt(wt_max)+1;
-	    val[count]=max-count;
+	    val[count]=(max-count)*ht.get(it);
+	    if(ht.)
 	    lru_data.add(Integer.parseInt(line));
 	}
 	if(count!=cache_cap){
@@ -70,7 +78,7 @@ public class Packing{
 	count=0;
 	int hit_rate=0;
 
-	int it,ind;
+	int ind;
 	while(true){
 	    line=test.readLine();
 	    if(line != null){
@@ -101,6 +109,40 @@ public class Packing{
         }
 	trace.close();
 	lru.close();
+
+    }
+    
+
+    public static void getRefCounts(BufferedReader fp) throws IOException{
+	int it;
+	String line;
+	while(true){
+	    line=fp.readLine();
+	    if(line!=null){
+		line=line.trim();
+		it=Integer.parseInt(line);
+		if(ht.containsKey(it)==false){
+		    // key is not present
+		    ht.put(it,1); // init ref count
+		}
+		else{
+		    // key is present
+		    ht.put(it,ht.get(it)+1); // increment ref count		    
+		}
+	    }
+	    else{
+		return;
+	    }
+	}
+    }
+    
+    public static void printHT(){
+	Iterator itr = ht.entrySet().iterator();
+	for(;itr.hasNext();){
+	    Map.Entry pair=(Map.Entry)itr.next();
+	    System.out.println(pair.getKey()+" = "+ pair.getValue());
+	    itr.remove();
+	}
 
     }
 }
