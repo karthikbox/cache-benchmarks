@@ -24,7 +24,7 @@ public class Packing{
 	Random gen=new Random(seed);
 	
 	getRefCounts(trace);
-	printHT();
+	// printHT();
 	ArrayList<Integer> lru_data=new ArrayList<Integer>(cache_cap+1);
 	lru_data.add(-99);	// some dummy data for 0th index
 	String line;
@@ -41,8 +41,9 @@ public class Packing{
 	    }
 	    count++;
 	    wt[count]=gen.nextInt(wt_max)+1;
+	    if(ht.get(it)==null)
+		System.out.println("hello "+it+" "+ht.get(it));
 	    val[count]=(max-count)*ht.get(it);
-	    if(ht.)
 	    lru_data.add(Integer.parseInt(line));
 	}
 	if(count!=cache_cap){
