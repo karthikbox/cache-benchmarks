@@ -9,9 +9,9 @@ public class Packing{
     static int wt_max=50;	// [1-wt_max] is the weight of items
     static long seed=0xDEADBEEF; // seed for random number generator
 
-    public static int [][]st=new int[cache_cap+1][sack_cap+1];;
+    public static double [][]st=new double[cache_cap+1][sack_cap+1];
     public static int []wt=new int[cache_cap+1];
-    public static int []val=new int[cache_cap+1];
+    public static double []val=new double[cache_cap+1];
     public static boolean[][] sol = new boolean[cache_cap+1][sack_cap+1];
 
     public static void main(String[] args) throws IOException{
@@ -34,7 +34,7 @@ public class Packing{
 	    }
 	    count++;
 	    wt[count]=gen.nextInt(wt_max)+1;
-	    val[count]=max-count;
+	    val[count]=max/count;
 	    lru_data.add(Integer.parseInt(line));
 	}
 	if(count!=cache_cap){
@@ -43,8 +43,8 @@ public class Packing{
 	int n,w;
 	for(n=1;n<=cache_cap;n++){
 	    for(w=1;w<=sack_cap;w++){
-		int option1 = st[n-1][w];
-		int option2=Integer.MIN_VALUE;
+		double option1 = st[n-1][w];
+		double option2=Integer.MIN_VALUE;
 		if(wt[n]<=w){
 		    option2=val[n]+st[n-1][w-wt[n]];
 		}
