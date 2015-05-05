@@ -4,7 +4,7 @@ import java.util.*;
 public class Packing{
 
     static int cache_cap=3000;	// size of cache
-    static int sack_cap=600;	// size of knapsack
+    static int sack_cap=16000;	// size of knapsack
     static int max=10000;	// max value, used to do MAX-LRU_index
     static int wt_max=50;	// [1-wt_max] is the weight of items
     static long seed=0xDEADBEEF; // seed for random number generator
