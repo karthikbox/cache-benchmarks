@@ -1,0 +1,8 @@
+MEASURE USED:
+value=(max-count)*frequency;   per item in LRU list
+max=10000;
+FINAL AVG HIT RATE-> 61.60501505012564
+MAX HIT RATE POSSIBLE-> hit rate = 73.92721211970446
+Knapsack size-> 21.333333333333336% of cache items size
+
+
