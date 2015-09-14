@@ -29,24 +29,46 @@ public class Packing{
 	String base="/home/karthik/cache-benchmark/lirs-trc/";
 	BufferedReader trace=new BufferedReader(new FileReader(base+"/sprite-train.trc"));
 	ht=new HashMap<Integer,Integer>(cache_cap);
-	getRefCounts(trace);
-	trace.close();
 	st=new double[cache_cap+1][sack_cap+1];;
 	wt=new int[cache_cap+1];
 	val=new double[cache_cap+1];
 	sol = new boolean[cache_cap+1][sack_cap+1];
 	take = new boolean[cache_cap+1];
 	lru_data=null;
+	int ct=0;
+	LRUCache cache=new LRUCache(cache_cap);
+	while(getRefCounts(trace,Integer.MAX_VALUE,cache)){
+	    System.out.println(ct++);
+	    BufferedWriter w=new BufferedWriter(new FileWriter(base+"/sprite-lru1.dat"));
+	    printCache(cache,w);
+	    w.close();
+	    setup();
+	}
+	System.out.println(ct++);
+	BufferedWriter w=new BufferedWriter(new FileWriter(base+"/sprite-lru1.dat"));
+	printCache(cache,w);
+	w.close();
+	setup();
+	trace.close();
+    }
 
+    public static void printCache(LRUCache cache,BufferedWriter w)  throws IOException{
+	Node t = cache.head;
+	while(t!=null){
+	    w.write(t.key+"\n");
+	    t=t.next;
+	}
+    }
 
+    public static void setup() throws IOException{
 	sum=0;
 	avg=0;
 	gen=new Random(seed);
 	System.out.println("LfuLru");
 	obj=new LfuLru();
 	do_run();
-
-
+	
+	
 	sum=0;
 	avg=0;
 	gen=new Random(seed);
@@ -54,23 +76,6 @@ public class Packing{
 	obj=new  LfuLruInverse();
 	do_run();
 
-
-	sum=0;
-	avg=0;
-	gen=new Random(seed);
-	System.out.println("Lru index");
-	obj=new LruIndex();
-	do_run();
-
-
-	sum=0;
-	avg=0;
-	gen=new Random(seed);
-	System.out.println("Inverse Lru index");
-	obj=new LruIndexInverse();
-	do_run();
-	
-	
     }
 
     public static void do_run() throws IOException{
@@ -84,7 +89,7 @@ public class Packing{
 	    Arrays.fill(val,0);
 	    Arrays.fill(take,false);
 	    // open lru cache items
-	    BufferedReader lru=new BufferedReader(new FileReader(base+"/sprite-lru.dat"));
+	    BufferedReader lru=new BufferedReader(new FileReader(base+"/sprite-lru1.dat"));
 	    // create a new list for cache items
 	    lru_data=new ArrayList<Integer>(cache_cap+1);
 	    // randomly assign wts for cache items
@@ -102,14 +107,16 @@ public class Packing{
     }
     
 
-    public static void getRefCounts(BufferedReader fp) throws IOException{
+    public static boolean getRefCounts(BufferedReader fp,int count,LRUCache cache) throws IOException{
 	int it;
 	String line;
+	int t=0;
 	while(true){
 	    line=fp.readLine();
 	    if(line!=null){
 		line=line.trim();
 		it=Integer.parseInt(line);
+		cache.set(it,0);
 		if(ht.containsKey(it)==false){
 		    // key is not present
 		    ht.put(it,1); // init ref count
@@ -118,9 +125,13 @@ public class Packing{
 		    // key is present
 		    ht.put(it,ht.get(it)+1); // increment ref count		    
 		}
+		t++;
+		if(t>=count){
+		    return true;
+		}
 	    }
 	    else{
-		return;
+		return false;
 	    }
 	}
     }
@@ -141,7 +152,6 @@ public class Packing{
 	int it;
 	int count=0;
 	while(true){
-	    
 	    line=lru.readLine();
 	    if(line != null){
 		line=line.trim();
@@ -238,5 +248,90 @@ public class Packing{
     
     public static double get_avg(){
 	return sum/RUN;
+    }
+}
+
+
+class Node{
+    int key;
+    int value;
+    Node pre;
+    Node next;
+ 
+    public Node(int key, int value){
+        this.key = key;
+        this.value = value;
+    }
+}
+
+
+class LRUCache {
+    int capacity;
+    HashMap<Integer, Node> map = new HashMap<Integer, Node>();
+    Node head=null;
+    Node end=null;
+ 
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+    }
+ 
+    public int get(int key) {
+        if(map.containsKey(key)){
+            Node n = map.get(key);
+            remove(n);
+            setHead(n);
+            return n.value;
+        }
+ 
+        return -1;
+    }
+ 
+    public void remove(Node n){
+        if(n.pre!=null){
+            n.pre.next = n.next;
+        }else{
+            head = n.next;
+        }
+ 
+        if(n.next!=null){
+            n.next.pre = n.pre;
+        }else{
+            end = n.pre;
+        }
+ 
+    }
+ 
+    public void setHead(Node n){
+        n.next = head;
+        n.pre = null;
+ 
+        if(head!=null)
+            head.pre = n;
+ 
+        head = n;
+ 
+        if(end ==null)
+            end = head;
+    }
+ 
+    public void set(int key, int value) {
+        if(map.containsKey(key)){
+            Node old = map.get(key);
+            old.value = value;
+            remove(old);
+            setHead(old);
+        }else{
+            Node created = new Node(key, value);
+            if(map.size()>=capacity){
+                map.remove(end.key);
+                remove(end);
+                setHead(created);
+ 
+            }else{
+                setHead(created);
+            }    
+ 
+            map.put(key, created);
+        }
     }
 }
