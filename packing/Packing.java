@@ -27,6 +27,22 @@ public class Packing{
 
     public static void main(String[] args) throws IOException{
 	String base="/home/karthik/cache-benchmark/lirs-trc/";
+	//exp_split_train_trace_run_knapsack_get_hitrate(base);
+	exp_run_different_knapsack_capacities_hitrate(base);
+    }
+
+    public static void exp_run_different_knapsack_capacities_hitrate(String base) throws IOException{
+	ArrayList<Integer> l=new ArrayList<Integer>();
+	int tot=64000;
+	while(tot<=cache_cap*25){
+	    tot+=8000;	    
+	    sack_cap=tot;
+	    System.out.println(sack_cap);
+	    do_exp_run_different_knapsack_capacities_hitrate(base);
+	}
+    }
+
+    public static void do_exp_run_different_knapsack_capacities_hitrate(String base) throws IOException{
 	BufferedReader trace=new BufferedReader(new FileReader(base+"/sprite-train.trc"));
 	ht=new HashMap<Integer,Integer>(cache_cap);
 	st=new double[cache_cap+1][sack_cap+1];;
@@ -37,19 +53,52 @@ public class Packing{
 	lru_data=null;
 	int ct=0;
 	LRUCache cache=new LRUCache(cache_cap);
-	while(getRefCounts(trace,Integer.MAX_VALUE,cache)){
-	    System.out.println(ct++);
+	//while(getRefCounts(trace,Integer.MAX_VALUE,cache)){
+	int split=Integer.MAX_VALUE;
+	while(getRefCounts(trace,split,cache)){
+	    System.out.println(++ct*split);
 	    BufferedWriter w=new BufferedWriter(new FileWriter(base+"/sprite-lru1.dat"));
 	    printCache(cache,w);
 	    w.close();
 	    setup();
 	}
-	System.out.println(ct++);
+	System.out.println(++ct*split);
 	BufferedWriter w=new BufferedWriter(new FileWriter(base+"/sprite-lru1.dat"));
 	printCache(cache,w);
 	w.close();
 	setup();
 	trace.close();
+
+    }
+
+
+    public static void exp_split_train_trace_run_knapsack_get_hitrate(String base) throws IOException{
+	BufferedReader trace=new BufferedReader(new FileReader(base+"/sprite-train.trc"));
+	ht=new HashMap<Integer,Integer>(cache_cap);
+	st=new double[cache_cap+1][sack_cap+1];;
+	wt=new int[cache_cap+1];
+	val=new double[cache_cap+1];
+	sol = new boolean[cache_cap+1][sack_cap+1];
+	take = new boolean[cache_cap+1];
+	lru_data=null;
+	int ct=0;
+	LRUCache cache=new LRUCache(cache_cap);
+	//while(getRefCounts(trace,Integer.MAX_VALUE,cache)){
+	int split=15000;
+	while(getRefCounts(trace,split,cache)){
+	    System.out.println(++ct*split);
+	    BufferedWriter w=new BufferedWriter(new FileWriter(base+"/sprite-lru1.dat"));
+	    printCache(cache,w);
+	    w.close();
+	    setup();
+	}
+	System.out.println(++ct*split);
+	BufferedWriter w=new BufferedWriter(new FileWriter(base+"/sprite-lru1.dat"));
+	printCache(cache,w);
+	w.close();
+	setup();
+	trace.close();
+
     }
 
     public static void printCache(LRUCache cache,BufferedWriter w)  throws IOException{
@@ -168,9 +217,9 @@ public class Packing{
 	    val[count]=obj.get_value(max,count,ht.get(it));
 	    lru_data.add(Integer.parseInt(line));
 	}
-	if(count!=cache_cap){
-	    System.out.println("cache not equal to cache_cap");
-	}
+	// if(count!=cache_cap){
+	//     System.out.println("cache not equal to cache_cap");
+	// }
 	
     }
 
