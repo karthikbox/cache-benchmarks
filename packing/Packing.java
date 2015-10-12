@@ -7,7 +7,7 @@ public class Packing{
     static int sack_cap=16000;	// size of knapsack CHANGE THIS
     static int max=10000;	// max value, used to do MAX-LRU_index
     static int wt_max=50;	// [1-wt_max] is the weight of items
-    static long seed=0xDEADBEEF; // seed for random number generator
+	static long seed=0xDEADBEEF; // seed for random number generator
     static long RUN = 50;	 // number of experiments
     static String base="/home/karthik/cache-benchmark/lirs-trc/";
 
