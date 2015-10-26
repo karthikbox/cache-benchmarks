@@ -41,9 +41,9 @@ class Simulation{
         boolean[] taken=new boolean[5000];
         ArrayList<Boolean[]> hotDataOfAllCaches = new ArrayList<Boolean[]>();
         for(int i=0;i<caches.length; i++) {
-            int w=(int)Math.ceil(0.02*unique_al.size()*25);
+            int w=(int)Math.ceil(0.002*unique_al.size()*25);
             int n=caches[i].map.size();
-            System.out.println("cache #"+i+" w="+w+" n="+n);
+            //System.out.println("cache #"+i+" w="+w+" n="+n);
             for(double[] t:table) {
                 Arrays.fill(t,0);
             }
@@ -144,10 +144,15 @@ class Simulation{
                 total_miss++;
             }
         }
+        String str="";
         for(int i=0;i<caches.length;i++){
-            System.out.println("hot-cache #"+i+" hits="+hits[i]+" miss="+miss[i]+" hitrate="+((float)hits[i]/(hits[i]+miss[i]))+" cached items="+caches[i].hotDataSetFromTakenArray.size());
+            //System.out.println("hot-cache #"+i+" hits="+hits[i]+" miss="+miss[i]+" hitrate="+((float)hits[i]/(hits[i]+miss[i]))+" cached items="+caches[i].hotDataSetFromTakenArray.size());
+            str+=String.format("%d,%d,%d,%f,%d\n",i,hits[i],miss[i],((float)hits[i]/(hits[i]+miss[i])),caches[i].hotDataSetFromTakenArray.size());
         }
-        System.out.println("total hits="+total_hits+" total miss="+total_miss+" total hitrate="+((float)total_hits/(total_hits+total_miss)));
+        //System.out.println("total hits="+total_hits+" total miss="+total_miss+" total hitrate="+((float)total_hits/(total_hits+total_miss)));
+        str+=String.format("%d,%d,%d,%f,%d\n",caches.length,total_hits,total_miss,((float)total_hits/(total_hits+total_miss)),10);
+        System.out.println();
+        System.out.println(str);
         r.close();
     }
 
@@ -173,10 +178,15 @@ class Simulation{
                 total_miss++;
             }
         }
+        String str="";
         for(int i=0;i<caches.length;i++){
-            System.out.println("cache #"+i+" hits="+hits[i]+" miss="+miss[i]+" hitrate="+((float)hits[i]/(hits[i]+miss[i]))+" cached items="+caches[i].map.size());
+            //System.out.println("cache #"+i+" hits="+hits[i]+" miss="+miss[i]+" hitrate="+((float)hits[i]/(hits[i]+miss[i]))+" cached items="+caches[i].map.size());
+            str+=String.format("%d,%d,%d,%f,%d\n",i,hits[i],miss[i],((float)hits[i]/(hits[i]+miss[i])),caches[i].map.size());
         }
-        System.out.println("total hits="+total_hits+" total miss="+total_miss+" total hitrate="+((float)total_hits/(total_hits+total_miss)));
+        //System.out.println("total hits="+total_hits+" total miss="+total_miss+" total hitrate="+((float)total_hits/(total_hits+total_miss)));
+        str+=String.format("%d,%d,%d,%f,%d\n",caches.length,total_hits,total_miss,((float)total_hits/(total_hits+total_miss)),caches[0].map.size()*caches.length);
+        System.out.println();
+        System.out.println(str);
         r.close();
     }
 
