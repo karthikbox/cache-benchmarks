@@ -1,0 +1,31 @@
+May 5, 2015
+
+
+MAX HIT RATE POSSIBLE-> hit rate = 73.92721211970446
+Knapsack size-> 21.34% of cached items size
+
++-----+-----+------+-----+-----+
+|     |run 1|run 2 |run 3|run 4|
++-----+-----+------+-----+-----+
+|hit  |37.27|54.14 |61.61|61.85|
+|rate |     |      |     |     |
++-----+-----+------+-----+-----+
+
+run 1
+MEASURE USED:
+value= MAX - index;
+
+run 2
+MEASURE USED:
+value= MAX/index;
+
+run 3
+MEASURE USED:
+value= (MAX-index)*frequency;
+
+run 4
+MEASURE USED:
+value= (MAX/index)*frequency;
+
+index     = index of item in lru list. The length of lru list is LRU_SIZE.
+frequency = number of occurences of the item.

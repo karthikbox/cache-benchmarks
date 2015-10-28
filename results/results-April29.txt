@@ -1,0 +1,44 @@
+April 29, 2015
+
+
++-------+-------+-------+-------+-------+
+|       |run 1  |run 2  |run 3  |run 4  |
++-------+-------+-------+-------+-------+
+|hit    |8.18   |5.89   |14.09  |9.67   |
+|rate % |       |       |       |       |
++-------+-------+-------+-------+-------+
+ 
+Hit rate of test data, by saving only 600 weight units.
+
+run 1
+MEASURE USED:
+value= MAX - count;
+
+run 2
+MEASURE USED:
+value= MAX/count;
+
+run 3
+MEASURE USED:
+value= (MAX-count)*frequency;
+
+run 4
+MEASURE USED:
+value= (MAX/count)*frequency;
+
+
+count=index of item in lru list. The length of lru list is LRU_SIZE.
+frequency=number of occurences of the item.
+value= this is value of each item in LRU list.
+weight= weight of each item. randomly chosen between [1-50].
+knapsack capacity = 600 = 20% of LRU_SIZE
+
+
+Constants used:
++--------+-----+
+|  MAX   |10000|
++--------+-----+
+|LRU_SIZE|3000 |
++--------+-----+
+
+I've used the same random seed accross all experiments.
