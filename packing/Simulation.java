@@ -17,7 +17,7 @@ class Simulation{
 
     static LRUCache[] caches;
     static LRUCache masterCache;
-    static String base="/home/karthik/cache-benchmark/lirs-trc/";
+    static String base="/Users/karthik/cache-benchmarks/lirs-trc/";
     static HashMap<Integer, Integer> unique_ht_count; // do not use this for knapsack value
     static ArrayList<Integer> unique_al;
     static HashMap<Integer,Integer> unique_ht_weight;
