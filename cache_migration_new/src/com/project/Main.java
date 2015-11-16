@@ -56,13 +56,20 @@ public class Main {
         assignRandomWeightsTo(unique_al);
         //train the caches using train trace
         trainCaches("sprite-train.trc",lookupRing);
-        runNaiveModel(lookupRing, allCaches);
+        //runNaiveModel(lookupRing, allCaches);
+        //runNoModel(lookupRing,allCaches);
 //        for(LRUCache c:allCaches) {
 //            System.out.println(c.cacheId+" "+c.map.size());
 //        }
         //runHotDatDistributionModel(lookupRing,allCaches);
 
     }
+
+    private static void runNoModel(ConsistentHashing lookupRing, LRUCache[] allCaches) throws IOException, HashGenerationException {
+        //run test trace on this lookup ring
+        testCaches("sprite-test.trc",lookupRing);
+    }
+
 
     public static void assignRandomWeightsTo(ArrayList<Integer> al){
         unique_ht_weight=new HashMap<Integer,Integer>();
