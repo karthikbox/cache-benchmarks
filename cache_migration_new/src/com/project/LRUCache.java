@@ -109,4 +109,15 @@ public class LRUCache {
     public String toString() {
         return this.cacheId;
     }
+
+    public int getFreqSum() {
+//        returns the sum of frequencies of items in the cache
+        Node t=head;
+        int sum=0;
+        while(t!=null){
+            sum+=t.count;
+            t=t.next;
+        }
+        return sum;
+    }
 }

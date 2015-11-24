@@ -13,7 +13,10 @@ import java.util.Random;
 public class Main {
 
 
-    public static int CACHE_CAPACITY = 500;//DEFAULT SIZE IS 3000
+
+    //current state: runHotDataBackupModel, with updates to backup, min-freq
+
+    public static int CACHE_CAPACITY = 300;//DEFAULT SIZE IS 3000
     private static double knapsackWeight = 0.2; // as percentage, DEFAULT SIZE IS 0.02
 
 
@@ -98,10 +101,12 @@ public class Main {
                 backupServerCache.set(s, 0);
             }
         }
-        //randomly select node to kill
-        Random rand = new Random(SEED);
-        int node_kill_index = rand.nextInt(CACHE_NUM);
-        System.out.println("random node to be killed = " + node_kill_index);
+        // "random" return a random node to kill
+        // "max-freq" returns a cache with highest sum of frequencies
+        // "min-freq" returns a cache with lowest sum of frequencies
+        String s="min-freq";
+        int node_kill_index=getKillNodeIndex(s,allCaches);
+        System.out.println(s+" node to be killed = " + node_kill_index);
         //run trace for this model
         testCaches("sprite-test.trc", lookupRing, allCaches[node_kill_index], backupServerCache);
     }
@@ -193,10 +198,13 @@ public class Main {
 
 
     private static void runHotDatDistributionModel(ConsistentHashing lookupRing, LRUCache[] allCaches) throws HashGenerationException, IOException {
-        //pick a random node to kill. Random node is an integer between 0-9
-        Random rand = new Random(SEED);
-        int node_kill_index = rand.nextInt(CACHE_NUM);
-        System.out.println("random node to be killed = " + node_kill_index);
+
+        // "random" return a random node to kill
+        // "max-freq" returns a cache with highest sum of frequencies
+        // "min-freq" returns a cache with lowest sum of frequencies
+        String s="min-freq";
+        int node_kill_index=getKillNodeIndex(s,allCaches);
+        System.out.println(s+" node to be killed = " + node_kill_index);
 
         //remove node from lookup ring
         lookupRing.remove(allCaches[node_kill_index]);
@@ -313,9 +321,12 @@ public class Main {
 
 
     private static void runNaiveModel(ConsistentHashing lookupRing, LRUCache[] allCaches) throws IOException, HashGenerationException {
-        //pick a random node to kill. Random node is an integer between 0-9
-        Random rand = new Random(SEED);
-        int node_kill_index = rand.nextInt(CACHE_NUM);
+        // "random" return a random node to kill
+        // "max-freq" returns a cache with highest sum of frequencies
+        // "min-freq" returns a cache with lowest sum of frequencies
+        String s="min-freq";
+        int node_kill_index=getKillNodeIndex(s,allCaches);
+        System.out.println(s+" node to be killed = " + node_kill_index);
         System.out.println("random node to be killed = " + node_kill_index);
         //remove node from lookup ring
         lookupRing.remove(allCaches[node_kill_index]);
@@ -403,4 +414,42 @@ public class Main {
 
     }
 
+    public static int getKillNodeIndex(String s, LRUCache[] allCaches) {
+        for(int i=0;i<allCaches.length;i++){
+            System.out.println(allCaches[i].toString()+" freqSum= "+allCaches[i].getFreqSum());
+        }
+        int killNodeIndex=Integer.MAX_VALUE;
+        int sum=-1;
+        switch (s){
+            case "random":
+                Random rand = new Random(SEED);
+                int node_kill_index = rand.nextInt(CACHE_NUM);
+                killNodeIndex=node_kill_index;
+                break;
+            case "max-freq":
+                int max=Integer.MIN_VALUE;
+                // get cache index which maximum sum of frequencies
+                for(int i=0;i<allCaches.length;i++){
+                    if((sum=allCaches[i].getFreqSum())>max){
+                        max=sum;
+                        killNodeIndex=i;
+                    }
+                }
+                break;
+            case "min-freq":
+                int min=Integer.MAX_VALUE;
+                for(int i=0;i<allCaches.length;i++){
+                    if((sum=allCaches[i].getFreqSum())< min){
+                        min=sum;
+                        killNodeIndex=i;
+                    }
+                }
+                break;
+            default:
+                // default case is "random"
+                killNodeIndex=getKillNodeIndex("random",allCaches);
+                break;
+        }
+        return killNodeIndex;
+    }
 }
