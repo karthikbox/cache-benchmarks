@@ -120,4 +120,14 @@ public class LRUCache {
         }
         return sum;
     }
+    public int getWeightSum() {
+//        returns the sum of frequencies of items in the cache
+        Node t=head;
+        int sum=0;
+        while(t!=null){
+            sum+=Main.unique_ht_weight.get(t.key);
+            t=t.next;
+        }
+        return sum;
+    }
 }

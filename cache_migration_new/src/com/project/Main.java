@@ -2,7 +2,6 @@ package com.project;
 
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class Main {
     private static final int REPLFACTOR = 8;
     private static int wt_max = 50;
     private static int MAX = 10000;
-    private static HashMap<Integer, Integer> unique_ht_weight;
+    public static HashMap<Integer, Integer> unique_ht_weight;
 
 
     public static void main(String[] args) throws HashGenerationException, IOException {
@@ -64,8 +63,86 @@ public class Main {
 //            System.out.println(c.cacheId+" "+c.map.size());
 //        }
         //runHotDatDistributionModel(lookupRing,allCaches);
-        runHotDataBackupModel(lookupRing, allCaches);
+        //runHotDataBackupModel(lookupRing, allCaches);
+        runHotDataBackupModelWithGlobalKnapsack(lookupRing,allCaches);
+    }
 
+    private static void runHotDataBackupModelWithGlobalKnapsack(ConsistentHashing lookupRing, LRUCache[] allCaches) throws IOException, HashGenerationException {
+        //back up hot data from every server
+        //apply knapsack at every server and store it in the back up server
+        //knapsack size as usual
+        //also creates a backupServerCache to hold the knapsack items from every cache
+
+        //capacity of knapsack at every cache
+        int w = (int) Math.ceil(knapsackWeight * unique_al.size() * 25);
+        int n = allCaches[0].map.size() + 200;//provisioning for worst case
+
+        // explicitly provision a back up LRUCache with capacity=CACHE_CAPACITY
+        LRUCache masterCache = new LRUCache(CACHE_CAPACITY, "backupServerCache");
+
+
+        double[][] table = new double[(int) Math.ceil(w) + 10][(int) Math.ceil(n) + 10];
+        boolean[][] sol = new boolean[(int) Math.ceil(w) + 10][(int) Math.ceil(n) + 10];
+        boolean[] taken = new boolean[(int) Math.ceil(n) + 10];
+        for (int i = 0; i < allCaches.length; i++) {
+            for (double[] t : table) {
+                Arrays.fill(t, 0);
+            }
+            for (boolean[] t : sol) {
+                Arrays.fill(t, false);
+            }
+            Arrays.fill(taken, false);
+            doKnapsack(allCaches[i], w, allCaches[i].map.size(), table, sol, taken);
+            //convert taken array indexes to element key hashset. element key is trace numbers.
+            allCaches[i].initHotDataMapFromTakenArray(taken);
+        }
+        mergeAllCachesAndInitCountOrder(masterCache,allCaches);
+        //get avh weight of all the caches and use that weight to be the knapsack weight
+        //run knapsack on master
+        for(int i=0;i<allCaches.length;i++){
+            System.out.println(allCaches[i].toString()+" wtSum= "+allCaches[i].getWeightSum());
+        }
+        w=CACHE_CAPACITY*25;
+        n=masterCache.cache_order.size();
+
+        table = new double[(int) Math.ceil(w) + 10][(int) Math.ceil(n) + 10];
+        sol = new boolean[(int) Math.ceil(w) + 10][(int) Math.ceil(n) + 10];
+        taken = new boolean[(int) Math.ceil(n) + 10];
+        for (double[] t : table) {
+            Arrays.fill(t, 0);
+        }
+        for (boolean[] t : sol) {
+            Arrays.fill(t, false);
+        }
+        Arrays.fill(taken, false);
+        doKnapsackOnMaster(masterCache,w, n, table, sol, taken);
+        masterCache.initHotDataMapFromTakenArray(taken);
+        System.out.println("backup server cache size items= "+CACHE_CAPACITY+"; weight capacity in wt= "+w);
+        System.out.println("items in backupserver after global knapsack"+masterCache.hotDataSetFromTakenArray.size());
+        for (int i : masterCache.hotDataSetFromTakenArray) {
+            masterCache.set(i, 0);
+        }
+
+        // "random" return a random node to kill
+        // "max-freq" returns a cache with highest sum of frequencies
+        // "min-freq" returns a cache with lowest sum of frequencies
+        String s="random";
+        int node_kill_index=getKillNodeIndex(s,allCaches);
+        System.out.println(s+" node to be killed = " + node_kill_index);
+        //run trace for this model
+        testCaches("sprite-test.trc", lookupRing, allCaches[node_kill_index], masterCache);
+    }
+
+    private static void mergeAllCachesAndInitCountOrder(LRUCache master, LRUCache[] allCaches){
+        //iterate over every cache
+        //from each cache get the countOrder map
+        int count=1;
+        for(int i = 0; i< allCaches.length; i++){
+            for(int s:allCaches[i].hotDataSetFromTakenArray){
+                master.cache_order.put(count, allCaches[i].map.get(s));
+                count++;
+            }
+        }
     }
 
     private static void runHotDataBackupModel(ConsistentHashing lookupRing, LRUCache[] allCaches) throws IOException, HashGenerationException {
@@ -104,7 +181,7 @@ public class Main {
         // "random" return a random node to kill
         // "max-freq" returns a cache with highest sum of frequencies
         // "min-freq" returns a cache with lowest sum of frequencies
-        String s="min-freq";
+        String s="random";
         int node_kill_index=getKillNodeIndex(s,allCaches);
         System.out.println(s+" node to be killed = " + node_kill_index);
         //run trace for this model
@@ -258,6 +335,40 @@ public class Main {
 
     }
 
+    public static void doKnapsackOnMaster(LRUCache c, int W, int N, double[][] table, boolean[][] sol, boolean[] taken) {
+        //no need for init order on master because mergeAllCachesAndInitCountOrder does that
+
+        for (int i = 0; i <= N; i++) {
+            table[0][i] = 0;
+        }
+        for (int i = 0; i <= W; i++) {
+            table[i][0] = 0;
+        }
+        //System.out.println("1");
+        for (int i = 1; i <= W; i++) {
+            for (int j = 1; j <= N; j++) {
+                double a1 = table[i][j - 1];// without j
+                double a2 = Integer.MIN_VALUE;
+                if (i >= weight(c, j)) {
+                    a2 = table[i - weight(c, j)][j - 1] + value(c, j);//with j
+                }
+                table[i][j] = Math.max(a1, a2);
+                sol[i][j] = a1 < a2;
+            }
+        }
+        //System.out.println("2");
+        int w = W;
+        for (int j = N; j > 0; j--) {
+            if (sol[w][j] == true) {
+                taken[j] = true;
+                w = w - weight(c, j);
+                //System.out.println("w= "+w);
+            } else {
+                taken[j] = false;
+            }
+        }
+
+    }
 
     public static void doKnapsack(LRUCache c, int W, int N, double[][] table, boolean[][] sol, boolean[] taken) {
         //resume here
@@ -415,9 +526,9 @@ public class Main {
     }
 
     public static int getKillNodeIndex(String s, LRUCache[] allCaches) {
-        for(int i=0;i<allCaches.length;i++){
-            System.out.println(allCaches[i].toString()+" freqSum= "+allCaches[i].getFreqSum());
-        }
+//        for(int i=0;i<allCaches.length;i++){
+//            System.out.println(allCaches[i].toString()+" freqSum= "+allCaches[i].getFreqSum());
+//        }
         int killNodeIndex=Integer.MAX_VALUE;
         int sum=-1;
         switch (s){
